@@ -18,7 +18,7 @@ impl PhoneNumber {
                 String::from("+") + &telno.to_owned()
             };
 
-            log::info!("New phone number: {}", &number);
+            //log::info!("New phone number: {}", &number);
 
             Some(Self { value: number })
         }

@@ -5,3 +5,6 @@ edition = "2018"
 
 [dependencies]
 santa-core = { path = "../libs/santa-core" }
+log = "0.4.14"
+simple_logger = "1.13.0"
+rand = "0.8.4"

@@ -1,6 +1,6 @@
 use crate::contact::ContactMethod;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Person<C>
 where
     C: ContactMethod,

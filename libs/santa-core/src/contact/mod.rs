@@ -1,3 +1,4 @@
+/// Trait for methods of contacting the participants
 pub trait ContactMethod {
     /// Get an immutable str ref to the value of the ContactMethod
     fn value(&self) -> &str;
