@@ -1,15 +1,18 @@
+use std::marker::PhantomData;
+
 use crate::contact::ContactMethod;
 
-#[derive(Debug, PartialEq)]
-pub struct Person<C>
+#[derive(PartialEq)]
+pub struct Person<'a, C>
 where
     C: ContactMethod,
 {
     name: String,
     contact: C,
+    phantom: PhantomData<&'a C>,
 }
 
-impl<C> Person<C>
+impl<'a, C> Person<'a, C>
 where
     C: ContactMethod,
 {
@@ -18,6 +21,7 @@ where
         Self {
             name: name.to_owned(),
             contact,
+            phantom: PhantomData,
         }
     }
 
@@ -29,6 +33,12 @@ where
     /// Get an immutable ref to the contact method of the Person
     pub fn contact(&self) -> &C {
         &self.contact
+    }
+}
+
+impl<C: ContactMethod> std::fmt::Debug for Person<'_, C> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
+        write!(f, "Person{{{} ({})}}", self.name(), self.contact().value())
     }
 }
 

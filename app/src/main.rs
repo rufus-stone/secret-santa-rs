@@ -1,6 +1,6 @@
 use santa_core as snt;
 use simple_logger::SimpleLogger;
-use snt::algorithm::*;
+use snt::algorithm::{inorder::*, rcl::*};
 use snt::contact::phone::*;
 use snt::person::*;
 use snt::santa::Santa;
@@ -18,12 +18,12 @@ fn main() {
     ];
 
     // Now create our Santa
-    let santa =
-        Santa::new(participants, RandomClosedLoop::default()).expect("Failed to create Santa!");
+    //let santa = Santa::new(participants, RandomClosedLoop::default()).expect("Failed to create Santa!");
+    let santa = Santa::new(participants, InOrder::default()).expect("Failed to create Santa!");
 
     santa.generate_pairings();
 
-    //log::info!("{:?}", &santa);
+    log::info!("{:?}", &santa);
 
     santa.inform_participants();
 }

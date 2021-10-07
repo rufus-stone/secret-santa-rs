@@ -1,10 +1,8 @@
 use rand::RngCore;
 
-use crate::{contact::ContactMethod, gift::Gift};
+use crate::{contact::ContactMethod, pairing::Pairing, person::Person};
 
-pub trait Algorithm {
-    fn generate_pairings();
-}
+use super::Algorithm;
 
 pub struct RandomClosedLoop<'a> {
     prng: Box<dyn RngCore + 'a>,
@@ -27,8 +25,8 @@ impl Default for RandomClosedLoop<'_> {
     }
 }
 
-impl Algorithm for RandomClosedLoop<'_> {
-    fn generate_pairings() {
+impl<'a, C: ContactMethod> Algorithm<'a, C> for RandomClosedLoop<'a> {
+    fn generate_pairings(&self, participants: &'a [Person<'a, C>]) -> Vec<Pairing<'a, C>> {
         todo!()
     }
 }

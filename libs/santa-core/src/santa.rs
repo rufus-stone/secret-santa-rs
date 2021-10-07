@@ -1,25 +1,29 @@
-use crate::gift::Gift;
+use crate::pairing::Pairing;
 use crate::person::Person;
 use crate::{algorithm::Algorithm, contact::ContactMethod};
 
+use std::marker::PhantomData;
+
 pub type SantaResult<T> = std::result::Result<T, String>;
 
-pub struct Santa<C, A>
+#[derive(Debug)]
+pub struct Santa<'a, C, A>
 where
     C: ContactMethod,
-    A: Algorithm,
+    A: Algorithm<'a, C>,
 {
-    participants: Vec<Person<C>>,
+    participants: Vec<Person<'a, C>>,
     algorithm: A,
+    phantom: PhantomData<&'a C>,
 }
 
-impl<C, A> Santa<C, A>
+impl<'a, C, A> Santa<'a, C, A>
 where
     C: ContactMethod,
-    A: Algorithm,
+    A: Algorithm<'a, C>,
 {
     /// Create a new Santa from the specified participants
-    pub fn new(participants: Vec<Person<C>>, algorithm: A) -> SantaResult<Self> {
+    pub fn new(participants: Vec<Person<'a, C>>, algorithm: A) -> SantaResult<Self> {
         // Need at least 3 people to participate!
         if participants.len() < 3 {
             return Err(String::from(
@@ -35,24 +39,22 @@ where
         Ok(Self {
             participants,
             algorithm,
+            phantom: PhantomData,
         })
     }
 
     /// Get an immutable ref to the Vec of participants
-    pub fn participants(&self) -> &[Person<C>] {
+    pub fn participants(&'a self) -> &'a [Person<'a, C>] {
         &self.participants
     }
 
     /// Use the provided Algorithm to generate the gift pairings
-    pub fn generate_pairings(&self) {
-        //-> Vec<Gift<C>> {
-        let names: Vec<String> = self
-            .participants()
-            .windows(2)
-            .map(|pair| pair[0].name().to_owned())
-            .collect();
+    pub fn generate_pairings(&'a self) {
+        let pairings = self.algorithm.generate_pairings(self.participants());
 
-        println!("{:?}", names);
+        for pairing in pairings {
+            log::info!("{:?}", pairing);
+        }
     }
 
     /// Generate our pairings
@@ -66,14 +68,14 @@ where
 }
 
 /// Implement a consuming IntoIterator for Santa (so we can do: for p in santa {})
-impl<C, A> IntoIterator for Santa<C, A>
+impl<'a, C, A> IntoIterator for Santa<'a, C, A>
 where
     C: ContactMethod,
-    A: Algorithm,
+    A: Algorithm<'a, C>,
 {
-    type Item = Person<C>;
+    type Item = Person<'a, C>;
 
-    type IntoIter = std::vec::IntoIter<Person<C>>;
+    type IntoIter = std::vec::IntoIter<Person<'a, C>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.participants.into_iter()
@@ -81,14 +83,14 @@ where
 }
 
 /// Implement a non-consuming IntoIterator for Santa (so we can do: for p in &santa {})
-impl<'a, C, A> IntoIterator for &'a Santa<C, A>
+impl<'a, C, A> IntoIterator for &'a Santa<'a, C, A>
 where
     C: ContactMethod,
-    A: Algorithm,
+    A: Algorithm<'a, C>,
 {
-    type Item = <std::slice::Iter<'a, Person<C>> as Iterator>::Item;
+    type Item = <std::slice::Iter<'a, Person<'a, C>> as Iterator>::Item;
 
-    type IntoIter = std::slice::Iter<'a, Person<C>>;
+    type IntoIter = std::slice::Iter<'a, Person<'a, C>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.participants.as_slice().iter()
@@ -116,7 +118,7 @@ mod tests {
         ];
 
         let mut prng = ChaCha8Rng::from_seed(Default::default());
-        let algo = algorithm::RandomClosedLoop::new(&mut prng);
+        let algo = algorithm::rcl::RandomClosedLoop::new(&mut prng);
 
         // Now create our Santa
         let santa = Santa::new(participants, algo).unwrap();
@@ -134,7 +136,7 @@ mod tests {
         ];
 
         let mut prng = ChaCha8Rng::from_seed(Default::default());
-        let algo = algorithm::RandomClosedLoop::new(&mut prng);
+        let algo = algorithm::rcl::RandomClosedLoop::new(&mut prng);
 
         // Now create our Santa
         let santa = Santa::new(participants, algo).unwrap();
