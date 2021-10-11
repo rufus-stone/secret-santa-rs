@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use crate::contact::ContactMethod;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct Person<'a, C>
 where
     C: ContactMethod,

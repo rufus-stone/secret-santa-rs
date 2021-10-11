@@ -1,6 +1,6 @@
 use super::ContactMethod;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct PhoneNumber {
     value: String,
 }

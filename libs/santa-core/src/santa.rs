@@ -1,8 +1,8 @@
-use crate::pairing::Pairing;
+use std::marker::PhantomData;
+
+use crate::pairing::{GiftPairing, Pairing};
 use crate::person::Person;
 use crate::{algorithm::Algorithm, contact::ContactMethod};
-
-use std::marker::PhantomData;
 
 pub type SantaResult<T> = std::result::Result<T, String>;
 
@@ -49,13 +49,26 @@ where
     }
 
     /// Use the provided Algorithm to generate the gift pairings
-    pub fn generate_pairings(&'a self) {
-        let pairings = self.algorithm.generate_pairings(self.participants());
+    pub fn generate_pairings(&'a mut self) -> Vec<Pairing<'a, C>> {
+        let pairings = self.algorithm.generate_pairings(&self.participants);
 
-        for pairing in pairings {
+        for pairing in &pairings {
             log::info!("{:?}", pairing);
         }
+
+        pairings
     }
+
+    /// Alt
+    /*pub fn execute(participants: Vec<Person<'a, C>>, mut algorithm: A) -> Vec<GiftPairing<'a, C>> {
+        let pairings = algorithm.generate_pairings(&participants);
+
+        for pairing in &pairings {
+            log::info!("{:?}", pairing);
+        }
+
+        pairings
+    }*/
 
     /// Generate our pairings
     pub fn inform_participants(&self) {
@@ -118,7 +131,7 @@ mod tests {
         ];
 
         let mut prng = ChaCha8Rng::from_seed(Default::default());
-        let algo = algorithm::rcl::RandomClosedLoop::new(&mut prng);
+        let algo = algorithm::hamiltonian::Hamiltonian::new(&mut prng);
 
         // Now create our Santa
         let santa = Santa::new(participants, algo).unwrap();
@@ -136,7 +149,7 @@ mod tests {
         ];
 
         let mut prng = ChaCha8Rng::from_seed(Default::default());
-        let algo = algorithm::rcl::RandomClosedLoop::new(&mut prng);
+        let algo = algorithm::hamiltonian::Hamiltonian::new(&mut prng);
 
         // Now create our Santa
         let santa = Santa::new(participants, algo).unwrap();

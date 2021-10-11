@@ -27,6 +27,36 @@ impl<C: ContactMethod> std::fmt::Debug for Pairing<'_, C> {
     }
 }
 
+/// A GiftPairing is just a tuple of two Person structs, where .0 is the giver and .1 is the recipient
+pub struct GiftPairing<'a, C: ContactMethod>(Person<'a, C>, Person<'a, C>);
+
+impl<'a, C: ContactMethod> GiftPairing<'a, C> {
+    pub fn new(giver: Person<'a, C>, recipient: Person<'a, C>) -> Self {
+        Self(giver, recipient)
+    }
+
+    /// Get an immutable ref to the gift giver
+    pub fn giver(&self) -> &Person<C> {
+        &self.0
+    }
+
+    /// Get an immutable ref to the gift recipient
+    pub fn recipient(&self) -> &Person<C> {
+        &self.1
+    }
+}
+
+impl<'a, C: ContactMethod> std::fmt::Debug for GiftPairing<'a, C> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
+        write!(
+            f,
+            "GiftPairing{{{:?} -> {:?}}}",
+            self.giver(),
+            self.recipient()
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

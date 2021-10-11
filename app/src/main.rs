@@ -1,6 +1,6 @@
 use santa_core as snt;
 use simple_logger::SimpleLogger;
-use snt::algorithm::{inorder::*, rcl::*};
+use snt::algorithm::{hamiltonian::*, inorder::*};
 use snt::contact::phone::*;
 use snt::person::*;
 use snt::santa::Santa;
@@ -9,7 +9,6 @@ fn main() {
     // Start logger
     SimpleLogger::new().init().unwrap();
 
-    // Create some participants
     // First, create some participants with phone numbers
     let participants = vec![
         Person::new("Alice", PhoneNumber::new("441122334455").unwrap()),
@@ -19,11 +18,10 @@ fn main() {
 
     // Now create our Santa
     //let santa = Santa::new(participants, RandomClosedLoop::default()).expect("Failed to create Santa!");
-    let santa = Santa::new(participants, InOrder::default()).expect("Failed to create Santa!");
-
-    santa.generate_pairings();
-
+    let mut santa = Santa::new(participants, InOrder::default()).expect("Failed to create Santa!");
     log::info!("{:?}", &santa);
 
-    santa.inform_participants();
+    let pairings = santa.generate_pairings();
+
+    //santa.inform_participants();
 }
